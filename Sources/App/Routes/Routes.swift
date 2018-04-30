@@ -70,7 +70,7 @@ extension Droplet {
             return "The customerId is \(customerId)"
         }
         
-        // MARK: Groups
+        // MARK: Group & Grouped
         
         group("v1") { v1 in
             
@@ -93,5 +93,17 @@ extension Droplet {
         v2.get("users") { req in
             return "returned v2/users"
         }
+        
+        // MARK: Post
+        post("customer") { req in
+            guard let name = req.json?["name"]?.string,
+                let age = req.json?["age"]?.int
+            else {
+                fatalError("Invalid parameters")
+            }
+            
+            return "the name is \(name), the age is \(age)"
+        }
+        
     }
 }
