@@ -68,6 +68,30 @@ extension Droplet {
         get("customer", Int.parameter) { req in
             let customerId = try req.parameters.next(Int.self)
             return "The customerId is \(customerId)"
+        }
+        
+        // MARK: Groups
+        
+        group("v1") { v1 in
+            
+            // v1/customers
+            v1.get("customers") { req in
+                return "customers in v1"
             }
+            // v1/users
+            v1.get("users") { req in
+                return "users in v1"
+            }
+        }
+        
+        // Grouped does not provide a closure
+        let v2 = grouped("v2")
+        v2.get("customers") { req in
+            return "returned v2/customers"
+        }
+        
+        v2.get("users") { req in
+            return "returned v2/users"
+        }
     }
 }
