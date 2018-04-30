@@ -104,6 +104,11 @@ extension Droplet {
             
             return "the name is \(name), the age is \(age)"
         }
-        
+
+        // MARK: Controllers
+        let taskController = TaskController()
+        // The requests coming to /task will get resolved in TaskController.getAllTasks
+        get("tasks", handler: taskController.getAllTasks)
+        get("tasks", ":taskId", handler: taskController.getTaskById)
     }
 }
