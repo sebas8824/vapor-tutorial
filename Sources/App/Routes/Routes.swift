@@ -121,6 +121,7 @@ extension Droplet {
             return try JSON(node: node)
         }
         
+        // Post record by name
         post("pokemon") { request in
             guard let name = request.json?["name"]?.string else {
                 fatalError("parameter name not found")
@@ -129,6 +130,63 @@ extension Droplet {
             try pokemon.save()
             
             return try JSON(node: ["success":true, "name":pokemon.name as String])
+        }
+        
+        // Get records
+        get("pokemon/all") { request in
+            return try Pokemon.all().makeJSON()
+        }
+        
+        // Get by id
+        get("pokemon", ":id") { request in
+            guard let id = request.parameters["id"]?.int,
+                let pokemon = try Pokemon.find(id)
+                else {
+                return try JSON(node: ["error": "Pokemon not found"])
+            }
+            return try pokemon.makeJSON()
+        }
+        
+        // Get by title using a queryString
+        get("pokemon") { request in
+            guard let name = request.query?["name"]?.string else {
+                return try JSON(node: ["error": "Incorrect parameters"])
+            }
+            let pokemon = try Pokemon.all().filter { $0.name == name }
+            return try pokemon.makeJSON()
+            
+        }
+        
+        // Deleting records with id in the request header
+        delete("pokemon") { request in
+            guard let pk = request.json?["id"]?.int else {
+                return try JSON(node: ["error": "Incorrect parameters"])
+            }
+            guard let pokemon = try Pokemon.find(pk) else {
+                return try JSON(node: ["error": "Pokemon with id not found"])
+            }
+            
+            try pokemon.delete()
+            return try JSON(node: ["success": true, "message": "\(pokemon.name) deleted successfully"])
+        }
+        
+        // Update records with a given data
+        put("pokemon") { request in
+            guard let id = request.json?["id"]?.int,
+                let name = request.json?["name"]?.string
+                else {
+                    return try JSON(node: ["error": "Invalid parameters"])
+                }
+            
+            guard let pokemon = try Pokemon.find(id) else {
+                return try JSON(node: ["error": "Pokemon not found"])
+            }
+            
+            pokemon.name = name
+            // Will look if the id is there, and updates the existing records
+            try pokemon.save()
+            return try JSON(node: ["success": true, "message":"\(pokemon.name) updated!"])
+            
         }
     }
 }
