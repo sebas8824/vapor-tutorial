@@ -114,5 +114,21 @@ extension Droplet {
         // MARK: RESTController
         let RESTcontroller = RESTController()
         resource("test", RESTcontroller)
+        
+        // MARK: Fluent provider
+        get("version") { request in
+            let node = try Pokemon.database?.driver.raw("select sqlite_version();")
+            return try JSON(node: node)
+        }
+        
+        post("pokemon") { request in
+            guard let name = request.json?["name"]?.string else {
+                fatalError("parameter name not found")
+            }
+            let pokemon = Pokemon(name: name)
+            try pokemon.save()
+            
+            return try JSON(node: ["success":true, "name":pokemon.name as String])
+        }
     }
 }
